@@ -28,6 +28,7 @@
   "homepage": "https://github.com/ErikGartner/dtree",
   "dependencies": {
     "d3": "^4.5.0",
+    "d3-tree": "^1.0.22",
     "lodash": "^4.0.0"
   },
   "devDependencies": {
@@ -40,7 +41,7 @@
     "conventional-github-releaser": "^0.5.1",
     "del": "^1.1.1",
     "glob": "^5.0.14",
-    "gulp": "^3.8.10",
+    "gulp": "^4.0.2",
     "gulp-babel": "^5.0.0",
     "gulp-bump": "^1.0.0",
     "gulp-conventional-changelog": "^0.7.0",

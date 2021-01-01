@@ -27,12 +27,12 @@ const exportFileName = path.basename(mainFile, path.extname(mainFile));
 
 // Remove the built files
 gulp.task('clean', function(cb) {
-  del([destinationFolder], cb);
+  return del([destinationFolder], cb);
 });
 
 // Remove our temporary files
 gulp.task('clean-tmp', function(cb) {
-  del(['tmp'], cb);
+  return del(['tmp'], cb);
 });
 
 function createLintTask(taskName, files) {
@@ -55,7 +55,7 @@ function getPackageJsonVersion () {
 }
 
 // Build two versions of the library
-gulp.task('build', ['lint-src', 'clean'], function(done) {
+gulp.task('build', gulp.series('lint-src', 'clean', function(done) {
   var version = getPackageJsonVersion();
   rollup.rollup({
     entry: 'src/' + config.entryFileName,
@@ -71,6 +71,7 @@ gulp.task('build', ['lint-src', 'clean'], function(done) {
       // `name` -> `moduleName`
       moduleName: config.mainVarName,
     });
+    console.log(destinationFolder);
 
     $.file(exportFileName + '.js', res.code, { src: true })
       .pipe($.preprocess({context: {DTREE_VERSION: version}}))
@@ -78,17 +79,16 @@ gulp.task('build', ['lint-src', 'clean'], function(done) {
       .pipe($.sourcemaps.init({ loadMaps: true }))
       .pipe($.babel())
       .pipe($.sourcemaps.write('./'))
-      .pipe(gulp.dest(destinationFolder))
+      .pipe(gulp.dest(destinationFolder + '/'))
       .pipe($.filter(['*', '!**/*.js.map']))
       .pipe($.rename(exportFileName + '.min.js'))
       .pipe($.sourcemaps.init({ loadMaps: true }))
       .pipe($.uglify())
       .pipe($.sourcemaps.write('./'))
-      .pipe(gulp.dest(destinationFolder))
-      .on('end', done);
+      .pipe(gulp.dest(destinationFolder + '/'));
   })
-  .catch(done);
-});
+  .catch(done());
+}));
 
 function bundle(bundler) {
   return bundler.bundle()
@@ -215,9 +215,9 @@ gulp.task('release', function (callback) {
     });
 });
 
-gulp.task('demo', ['build'], $.shell.task([
+gulp.task('demo', gulp.series('build', $.shell.task([
   'node test/demo/demo.js'
-]))
+])))
 
 // An alias of build
-gulp.task('default', ['build']);
+gulp.task('default', gulp.series('build'));
